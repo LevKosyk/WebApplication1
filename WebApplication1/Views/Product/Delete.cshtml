@@ -1,0 +1,32 @@
+﻿@model WebApplication1.Models.Product
+@{
+    ViewData["Title"] = "Delete Page";
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4">Delete Product</h2>
+    <form asp-action="Delete" method="post">
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <p class="form-control-plaintext">@Model.Name</p>
+        </div>
+        <div class="form-group">
+            <label for="price">Price:</label>
+            <p class="form-control-plaintext">@Model.Price</p>
+        </div>
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <p class="form-control-plaintext">@Model.Description</p>
+        </div>
+
+        <div class="alert alert-warning" role="alert">
+            Are you sure you want to delete this product?
+        </div>
+
+        <div>
+            <a href="/home/index" class="btn btn-secondary">Close</a>
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+    </form>
+</div>

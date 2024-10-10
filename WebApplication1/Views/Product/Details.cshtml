@@ -1,0 +1,27 @@
+﻿@model WebApplication1.Models.Product
+
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Details Page";
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4">Product Details</h2>
+    <form asp-action="Details" method="post" class="form-group">
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <p class="form-control-plaintext">@Model.Name</p>
+        </div>
+        <div class="form-group">
+            <label for="price">Price:</label>
+            <p class="form-control-plaintext">@Model.Price</p>
+        </div>
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <p class="form-control-plaintext">@Model.Description</p>
+        </div>
+
+        <a href="/home/index" class="btn btn-secondary">Go Back</a>
+    </form>
+</div>

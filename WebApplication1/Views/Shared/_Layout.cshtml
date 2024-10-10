@@ -1,0 +1,91 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.AspNetCore.Identity
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - WebApplication1</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WebApplication1.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        @if(!User.Identity.IsAuthenticated)
+        {
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary">Menu</button>
+                <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
+                    <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/">Home</a></li>
+                    <li><a class="dropdown-item" href="/User/login">Login</a></li>
+                    <li><a class="dropdown-item" href=" /User/Create">Create</a></li>
+                </ul>
+            </div>
+        }
+        else if (User.IsInRole("manger") || User.IsInRole("admin"))
+        {
+        <div class="btn-group">
+            <button type="button" class="btn btn-secondary">@User.Identity.Name</button>
+            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
+                <span class="visually-hidden">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/">Home</a></li>
+                <li><a class="dropdown-item" href="/Product/create">Create</a></li>
+                <li><a class="dropdown-item" href="/Product/read">Read</a></li>
+                    @if (User.IsInRole("admin"))
+                    {
+                        <li><a class="dropdown-item" href="/User/CreateRole">Create Role</a></li>
+                        <li><a class="dropdown-item" href="/User/AssignRole">AssignRole</a></li>
+                    }
+                <li>
+                    <form asp-controller="User" asp-action="Logout" method="post">
+                            <button type="submit" class="dropdown-item btn btn-danger" href="/User/Logout">Log-out</button>
+                    </form>
+                </li>
+            </ul>
+            </div>
+        }
+        else
+        {
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary">@User.Identity.Name</button>
+                <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
+                    <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/">Home</a></li>
+                    <li>
+                        <form asp-controller="User" asp-action="Logout" method="post">
+                            <button type="submit" class="dropdown-item btn btn-danger" href="/User/Logout">Log-out</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        }
+
+                
+            
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2024 - WebApplication1 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
