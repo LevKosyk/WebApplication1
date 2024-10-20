@@ -10,16 +10,19 @@
     <h2 class="mb-4">Create Product</h2>
     <form asp-action="Create" method="post">
         <div class="form-group">
-            <label for="name">Name:</label>
-            <input type="text" class="form-control" id="name" name="name" required />
+            <label asp-for="Name"></label>
+            <input type="text" class="form-control" asp-for="Name" />
+            <span asp-validation-for="Name" class="text-danger"></span>
         </div>
         <div class="form-group">
-            <label for="price">Price:</label>
-            <input type="text" class="form-control" id="price" name="price" required />
+            <label asp-for="Price"></label>
+            <input type="text" class="form-control" asp-for="Price" />
+            <span asp-validation-for="Price" class="text-danger"></span>
         </div>
         <div class="form-group">
-            <label for="description">Description:</label>
-            <textarea class="form-control" id="description" name="description" required></textarea>
+            <label asp-for="Description"></label>
+            <textarea class="form-control" asp-for="Description"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
         </div>
         <button type="submit" class="btn btn-primary">Create</button>
     </form>

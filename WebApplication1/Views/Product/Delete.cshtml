@@ -1,4 +1,5 @@
 ﻿@model WebApplication1.Models.Product
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     ViewData["Title"] = "Delete Page";
     Layout = "_Layout";
@@ -6,10 +7,14 @@
 
 <div class="container mt-5">
     <h2 class="mb-4">Delete Product</h2>
-    <form asp-action="Delete" method="post">
+    <form asp-action="Delete" asp-controller="Product" method="post">
+        <div class="form-group">
+            <label for="id">Id:</label>
+            <p class="form-control-plaintext" id="name" asp-for="Id" >@Model.Id</p>
+        </div>
         <div class="form-group">
             <label for="name">Name:</label>
-            <p class="form-control-plaintext">@Model.Name</p>
+            <p class="form-control-plaintext" asp-for="Name">@Model.Name</p>
         </div>
         <div class="form-group">
             <label for="price">Price:</label>
@@ -29,4 +34,5 @@
             <button type="submit" class="btn btn-danger">Delete</button>
         </div>
     </form>
+
 </div>

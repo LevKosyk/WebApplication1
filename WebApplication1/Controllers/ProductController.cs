@@ -1,69 +1,83 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WebApplication1.Models;
+using WebApplication1.Services;
 
 namespace WebApplication1.Controllers
 {
     public class ProductController : Controller
     {
-        public ActionResult Index()
+        private readonly IServiceProduct _serviceProduct;
+        public ProductController(IServiceProduct serviceProduct)
         {
+            _serviceProduct = serviceProduct;
+        }
+        [HttpGet]
+        public async Task<IActionResult> Read()
+        {
+            var products = await _serviceProduct.ReadAsync();
+            return View(products);
+        }
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var product = await  _serviceProduct.GetByIdAsync(id);
+            return View(product);
+        }
+        [HttpGet]
+        public IActionResult Create() {
             return View();
         }
-
-        public ActionResult Details(int id)
+        [Authorize(Roles = "admin,moderator")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]  
+        public async Task<IActionResult> Create([Bind("Id,Name,Price,Description")] Product product)
         {
-            return View();
+            if (ModelState.IsValid)
+            {
+                await _serviceProduct.CreateAsync(product);
+                return RedirectToAction("Read");
+            }
+            return RedirectToAction("Read");
         }
-
-        public ActionResult Create()
+        [HttpGet]
+        public async Task<IActionResult> Update(int id)
         {
-            return View();
+            Product product = await _serviceProduct.GetByIdAsync(id);
+            return View(product);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<IActionResult> Update(int id, Product product)
         {
-            try
+            Console.WriteLine(id);
+            if (ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                
+                _ = await _serviceProduct.UpdateAsync(id, product);
+                return RedirectToAction("Read");
             }
-            catch
-            {
-                return View();
-            }
+            return View("Read");
         }
-        public ActionResult Edit(int id)
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
         {
-            return View();
-        }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-        public ActionResult Delete(int id)
-        {
-            return View();
+            Product product = await _serviceProduct.GetByIdAsync(id);
+            return View(product);
         }
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public async Task<IActionResult> Delete(int id, string name)
         {
-            try
+            Console.WriteLine("id");
+            bool result = await _serviceProduct.DeleteAsync(id);
+            if (result)
             {
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Read");
             }
-            catch
+            else
             {
-                return View();
+                return NotFound();
             }
         }
     }

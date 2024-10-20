@@ -1,4 +1,5 @@
 ﻿@model WebApplication1.Models.Product
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     ViewData["Title"] = "Update Page";
     Layout = "_Layout";
@@ -6,20 +7,21 @@
 
 <div class="container mt-5">
     <h2 class="mb-4">Update Product</h2>
-    <form asp-action="Update" method="post">
+    <form asp-action="Update" asp-controller="Product" method="post">
+        @Html.AntiForgeryToken()
         <div class="form-group">
             <label for="name">Name:</label>
-            <input type="text" class="form-control" id="name" name="name" required value="@Model.Name" />
+            <input type="text" class="form-control" id="name" name="name" required value="@Model.Name" asp-for="Name" />
         </div>
         <div class="form-group">
             <label for="price">Price:</label>
-            <input type="text" class="form-control" id="price" name="price" required value="@Model.Price" />
+            <input type="text" class="form-control" id="price" name="price" required value="@Model.Price" asp-for="Price"  />
         </div>
         <div class="form-group">
             <label for="description">Description:</label>
-            <input type="text" class="form-control" id="description" name="description" required value="@Model.Description" />
+            <input type="text" class="form-control" id="description" name="description" required value="@Model.Description" asp-for="Description" />
         </div>
         <button type="submit" class="btn btn-primary">Update</button>
-        <a href="/home/index" class="btn btn-secondary">Cancel</a>
     </form>
+    <a href="/home/index" class="btn btn-secondary">Cancel</a>
 </div>
