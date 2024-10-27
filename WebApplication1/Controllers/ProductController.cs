@@ -27,7 +27,14 @@ namespace WebApplication1.Controllers
         }
         [HttpGet]
         public IActionResult Create() {
-            return View();
+            if (User.IsInRole("admin")|| User.IsInRole("moderator"))
+            {
+                return View();
+            }
+            else
+            {
+                return RedirectToAction("Page404");
+            }
         }
         [Authorize(Roles = "admin,moderator")]
         [HttpPost]
@@ -44,13 +51,21 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public async Task<IActionResult> Update(int id)
         {
-            Product product = await _serviceProduct.GetByIdAsync(id);
-            return View(product);
+            if (User.IsInRole("admin") || User.IsInRole("moderator"))
+            {
+                Product product = await _serviceProduct.GetByIdAsync(id);
+                return View(product);
+            }
+            else
+            {
+                return RedirectToAction("Page404");
+            }
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Update(int id, Product product)
         {
+
             Console.WriteLine(id);
             if (ModelState.IsValid)
             {
@@ -63,8 +78,16 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
-            Product product = await _serviceProduct.GetByIdAsync(id);
-            return View(product);
+            if (User.IsInRole("admin") || User.IsInRole("moderator"))
+            {
+                Product product = await _serviceProduct.GetByIdAsync(id);
+                return View(product);
+            }
+            else
+            {
+                return RedirectToAction("Page404");
+            }
+
         }
         [HttpPost]
         public async Task<IActionResult> Delete(int id, string name)
@@ -79,6 +102,11 @@ namespace WebApplication1.Controllers
             {
                 return NotFound();
             }
+        }
+        [HttpGet]
+        public IActionResult Page404()
+        {
+            return View();
         }
     }
 }
