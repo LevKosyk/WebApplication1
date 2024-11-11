@@ -16,10 +16,12 @@ namespace WebApplication1.Services
     {
         private readonly ProductContext _productContext;
         private readonly ILogger<ServiceProduct> _logger;
-        public ServiceProduct(ProductContext productContext, ILogger<ServiceProduct> logger)
+        private readonly IServiceOrder _serviceOrder;
+        public ServiceProduct(ProductContext productContext, ILogger<ServiceProduct> logger, IServiceOrder serviceOrder)
         {
             _productContext = productContext;
             _logger = logger;
+            _serviceOrder = serviceOrder;
         }
         public async Task<Product> CreateAsync(Product product)
         {
@@ -28,9 +30,17 @@ namespace WebApplication1.Services
                 _logger.LogWarning("Attemt null");
                 return null;
             }
+            Console.WriteLine(product.OrderId);
+            if (product.OrderId == 0 || product.Order == null)
+            {
+                _logger.LogWarning("Order or OrderId is not set correctly.");
+                return null;
+            }
             await _productContext.AddAsync(product);
             Console.WriteLine(product.Name, product.Description);
-            await _productContext.SaveChangesAsync();
+            int result = await _productContext.SaveChangesAsync();
+            Console.WriteLine("SaveChangesAsync result: " + result);
+
             return product;
         }
 

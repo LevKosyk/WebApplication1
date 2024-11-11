@@ -1,17 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using WebApplication1.Models; // Импортирует пространство имен для работы с Entity Framework Core // Импортирует пространство имен, где находятся модели приложения
-
-// Контекст базы данных для продуктов, наследующий от DbContext
+using WebApplication1.Models; 
 public class ProductContext : DbContext
 {
-    // Конструктор принимает параметры конфигурации контекста базы данных
-    public ProductContext(DbContextOptions<ProductContext> options)
-        : base(options) // Передает параметры в базовый класс DbContext
-    {
-        // Базовый класс DbContext настроит соединение с базой данных и определит таблицы
-    }
+    public ProductContext(DbContextOptions<ProductContext> options) : base(options) { }
 
-    // Свойство для доступа к таблице продуктов в базе данных
-    public DbSet<Product> Products { get; set; }
     public DbSet<Order> Orders { get; set; }
+    public DbSet<Product> Products { get; set; }
 }

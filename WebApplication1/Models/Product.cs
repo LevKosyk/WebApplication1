@@ -22,7 +22,10 @@ namespace WebApplication1.Models
         [StringLength(1025, MinimumLength = 2, ErrorMessage = "Введіть від 2 до 20 символів!")]
         [Required(ErrorMessage = "Filed must be not empty")]
         public string Description { get; set; }
-         
+
+        [ForeignKey("Order")]
+        public int OrderId { get; set; }  
+        public virtual Order Order { get; set; }
 
     }
 }

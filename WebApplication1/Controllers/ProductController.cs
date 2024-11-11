@@ -27,6 +27,7 @@ namespace WebApplication1.Controllers
         }
         [HttpGet]
         public IActionResult Create() {
+
             if (User.IsInRole("admin")|| User.IsInRole("moderator"))
             {
                 return View();
@@ -41,11 +42,7 @@ namespace WebApplication1.Controllers
         [ValidateAntiForgeryToken]  
         public async Task<IActionResult> Create([Bind("Id,Name,Price,Description")] Product product)
         {
-            if (ModelState.IsValid)
-            {
-                await _serviceProduct.CreateAsync(product);
-                return RedirectToAction("Read");
-            }
+            await _serviceProduct.CreateAsync(product);
             return RedirectToAction("Read");
         }
         [HttpGet]

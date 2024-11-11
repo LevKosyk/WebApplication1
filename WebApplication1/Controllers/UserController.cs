@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using WebApplication1.Models;
+using WebApplication1.Services;
 
 namespace WebApplication1.Controllers
 {
@@ -9,15 +11,21 @@ namespace WebApplication1.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ProductContext   _productContext;
+        private readonly IServiceOrder _serviceOrder;
         public UserController(
             UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
-            RoleManager<IdentityRole> roleManager
+            RoleManager<IdentityRole> roleManager,
+            ProductContext productContext,
+            IServiceOrder serviceOrder
             )
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _productContext = productContext;
+            _serviceOrder = serviceOrder;
         }
         [HttpGet]
         public IActionResult Create()
@@ -65,6 +73,21 @@ namespace WebApplication1.Controllers
                 );
             if (result.Succeeded)
             {
+                var user = await _userManager.FindByEmailAsync(email);
+                Console.WriteLine(user.Id);
+                ServiceUser.Id = user.Id;
+                ServiceUser.Order = _productContext.Orders.Where(e => e.UserId == user.Id) as Order;
+                if (ServiceUser.Order != null)
+                {
+                    Console.WriteLine(ServiceUser.Order.UserId);
+                }
+                else
+                {
+                    _serviceOrder.CreateOrder();
+                    Console.WriteLine("Order not found for the user.");
+                }
+
+
                 return RedirectToAction("Index", "Home");
             }
             return BadRequest("Error auth ...");

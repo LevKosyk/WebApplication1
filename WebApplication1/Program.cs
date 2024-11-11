@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using WebApplication1.Services;
 
 namespace WebApplication1
@@ -13,6 +16,7 @@ namespace WebApplication1
 
 
             builder.Services.AddScoped<IServiceProduct, ServiceProduct>();
+            builder.Services.AddScoped<IServiceOrder, ServiceOrder>();
 
             builder.Services.AddDbContext<ProductContext>(options =>
             {
@@ -34,14 +38,36 @@ namespace WebApplication1
                 options.Password.RequiredUniqueChars = 0;
                 options.Password.RequiredLength = 4;
             })
-                .AddEntityFrameworkStores<UserContext>();
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddEntityFrameworkStores<UserContext>()
+                .AddDefaultTokenProviders();
+
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
                 .AddCookie(options =>
                 {
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
                     options.SlidingExpiration = true;
-                    options.AccessDeniedPath = "api/APIUser/AccessDenied";
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                    };
                 });
+
+
+            builder.Services.AddAuthorization();
 
             builder.Services.AddControllersWithViews();
 

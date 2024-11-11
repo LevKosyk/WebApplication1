@@ -8,7 +8,9 @@ namespace WebApplication1.Services
         Task<Product> AddProductAsync(Product product, int orderId);
         Task<IEnumerable<Product>> GetProductsAsync(int orderId);
         Task<Product> GetByIdAsync(int id);
+        Task<Order> CreateOrder();
         Task<bool> DeleteProductAsync(int id, int orderId);
+        Task<Order> GetOrder(int id);
     }
 
     public class ServiceOrder : IServiceOrder
@@ -21,7 +23,18 @@ namespace WebApplication1.Services
             _productContext = productContext;
             _logger = logger;
         }
+        public async Task<Order> GetOrder(int id)
+        {
+            return  _productContext.Orders.Where(e => e.Id == id) as Order;
+        }
 
+        public async Task<Order> CreateOrder()
+        {
+            _productContext.Orders.Add(new Order { UserId = ServiceUser.Id, Products = new List<Product>()});
+            await _productContext.SaveChangesAsync();
+            //ServiceUser.Order = _productContext.Orders.Where(e => e.UserId == ServiceUser.Id)as Order;
+            return new Order();
+        }
         public async Task<Product> AddProductAsync(Product product, int orderId)
         {
             if (product == null)
