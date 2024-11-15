@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using WebApplication1.Models;
 using WebApplication1.Services;
 
@@ -18,52 +14,82 @@ namespace WebApplication1.Controllers.API
     {
         private readonly IServiceOrder _serviceOrder;
 
-        public ApiOrderController(IServiceOrder context)
+        public ApiOrderController(IServiceOrder serviceOrder)
         {
-            _serviceOrder = context;
+            _serviceOrder = serviceOrder;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Order>>> GetProducts()
+        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
-            var orders = await _serviceOrder.GetProductsAsync(ServiceUser.Order.Id);
-            return Ok(orders);
+            if (ServiceUser.Order == null || ServiceUser.Order.Id == 0)
+            {
+                return BadRequest(new { message = "Order not initialized for the user" });
+            }
+
+            var products = await _serviceOrder.GetProductsAsync(ServiceUser.Order.Id);
+            return Ok(products);
         }
+
         [HttpGet("{id}")]
-        public async Task<ActionResult<Order>> GetProduct(int id)
+        public async Task<ActionResult<Order>> GetOrderById(int id)
         {
             var order = await _serviceOrder.GetByIdAsync(id);
             if (order == null)
             {
-                return NotFound();
+                return NotFound(new { message = "Order not found" });
             }
+
             return Ok(order);
         }
-        [HttpPost]
+        [HttpPost("create")]
         public async Task<ActionResult<Order>> CreateOrder()
         {
-            _ = await _serviceOrder.CreateOrder();
-            return Ok();
+            var newOrder = await _serviceOrder.CreateOrder();
+            if (newOrder == null)
+            {
+                return StatusCode(500, new { message = "Failed to create the order" });
+            }
+
+            return CreatedAtAction(nameof(GetOrderById), new { id = newOrder.Id }, newOrder);
         }
-        [HttpPost]
-        public async Task<ActionResult<Order>> AddProduct(Product product)
+
+        [HttpPut("add-product")]
+        public async Task<ActionResult<Product>> AddProduct([FromBody] Product product)
         {
             if (product == null)
             {
-                return BadRequest("Product object is null");
+                return BadRequest(new { message = "Product object is null" });
             }
-            _ = await _serviceOrder.AddProductAsync(product, ServiceUser.Order.Id);
-            return Ok(product);
+
+            if (ServiceUser.Order == null || ServiceUser.Order.Id == 0)
+            {
+                return BadRequest(new { message = "Order not initialized for the user" });
+            }
+
+            var addedProduct = await _serviceOrder.AddProductAsync(product, ServiceUser.Order.Id);
+            if (addedProduct == null)
+            {
+                return StatusCode(500, new { message = "Failed to add the product to the order" });
+            }
+
+            return Ok(addedProduct);
         }
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteOrder(int id)
+        [HttpDelete("delete-product/{id}")]
+        public async Task<IActionResult> DeleteProduct(int id)
         {
+            if (ServiceUser.Order == null || ServiceUser.Order.Id == 0)
+            {
+                return BadRequest(new { message = "Order not initialized for the user" });
+            }
+
             var deleted = await _serviceOrder.DeleteProductAsync(id, ServiceUser.Order.Id);
             if (!deleted)
             {
-                return NotFound();
+                return NotFound(new { message = "Product not found in the order" });
             }
-            return Ok(new { message = "Product deleted successfully ..." });
+
+            return Ok(new { message = "Product deleted successfully" });
         }
     }
 }

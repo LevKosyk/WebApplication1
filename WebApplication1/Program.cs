@@ -1,10 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using WebApplication1.Services;
+using WebApplication1.Data;
 
 namespace WebApplication1
 {
@@ -14,61 +10,14 @@ namespace WebApplication1
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Add services to the container.
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(connectionString));
+            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddScoped<IServiceProduct, ServiceProduct>();
-            builder.Services.AddScoped<IServiceOrder, ServiceOrder>();
-
-            builder.Services.AddDbContext<ProductContext>(options =>
-            {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-            });
-
-            builder.Services.AddDbContext<UserContext>(options =>
-            {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-            });
-
-            builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
-            {
-                options.SignIn.RequireConfirmedEmail = true;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireDigit = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequiredUniqueChars = 0;
-                options.Password.RequiredLength = 4;
-            })
-                .AddEntityFrameworkStores<UserContext>()
-                .AddDefaultTokenProviders();
-
-
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-                .AddCookie(options =>
-                {
-                    options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
-                    options.SlidingExpiration = true;
-                })
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                        ValidAudience = builder.Configuration["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-                    };
-                });
-
-
-            builder.Services.AddAuthorization();
-
+            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
@@ -85,18 +34,18 @@ namespace WebApplication1
                 app.UseHsts();
             }
 
-            app.UseRouting();
-
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            app.UseAuthentication();
+            app.UseRouting();
+
             app.UseAuthorization();
 
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
-            app.MapControllers();
+            app.MapRazorPages();
+
             app.Run();
         }
     }
